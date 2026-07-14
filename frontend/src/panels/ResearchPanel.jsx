@@ -1,29 +1,45 @@
 import { useState } from 'react';
 import { marked } from 'marked';
 
-export default function ResearchPanel({ run }) {
-  const debate = run?.investment_debate_state;
-  const tabs = [];
-  if (debate?.bull_history) tabs.push('Bull');
-  if (debate?.bear_history) tabs.push('Bear');
-  if (debate?.judge_decision) tabs.push('Research Manager');
-  const [active, setActive] = useState(0);
-  if (tabs.length === 0) return null;
+const TABS = [
+  { key: 'bull_history',   label: 'Bull',             icon: '🐂', variant: 'bull' },
+  { key: 'bear_history',   label: 'Bear',             icon: '🐻', variant: 'bear' },
+  { key: 'judge_decision', label: 'Research Manager', icon: '⚖️',  variant: '' },
+];
 
-  const fieldMap = { Bull: 'bull_history', Bear: 'bear_history', 'Research Manager': 'judge_decision' };
-  const content = debate[fieldMap[tabs[active]]];
+export default function ResearchPanel({ run }) {
+  const [active, setActive] = useState(0);
+  const debate = run?.investment_debate_state;
+  const content = debate?.[TABS[active].key];
 
   return (
     <div className="panel">
-      <div className="panel-header"><span>🔍</span> Research Team</div>
-      <div className="panel-body" style={{ display: 'flex', flexDirection: 'column' }}>
+      <div className="panel-header">
+        <span className="drag-icon">⠿</span>
+        <span className="panel-icon">🔍</span>
+        Research Team
+      </div>
+      <div className="panel-body" style={{ display: 'flex', flexDirection: 'column', padding: '10px 14px' }}>
         <div className="tab-bar">
-          {tabs.map((n, i) => (
-            <button key={n} className={`tab-btn${i === active ? ' active' : ''}`}
-              onClick={() => setActive(i)}>{n}</button>
+          {TABS.map((t, i) => (
+            <button
+              key={t.key}
+              className={`tab-btn${i === active ? ' active' : ''}`}
+              data-variant={t.variant}
+              onClick={() => setActive(i)}
+            >
+              {t.icon} {t.label}
+            </button>
           ))}
         </div>
-        <div className="md-content" dangerouslySetInnerHTML={{ __html: marked.parse(content) }} />
+        {content ? (
+          <div className="md-content" dangerouslySetInnerHTML={{ __html: marked.parse(content) }} />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 8, color: 'var(--color-muted)' }}>
+            <span style={{ fontSize: 24 }}>📭</span>
+            <span style={{ fontSize: 11 }}>No {TABS[active].label} data found.</span>
+          </div>
+        )}
       </div>
     </div>
   );

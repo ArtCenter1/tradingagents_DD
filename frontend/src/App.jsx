@@ -18,7 +18,7 @@ const DEFAULT_LAYOUT = [
   { i: 'backtest',          x: 0,  y: 15, w: 12, h: 6, minH: 3 },
 ];
 
-const STORAGE_KEY = 'tradingagents-dd-layout';
+const STORAGE_KEY = 'tradingagents-dd-layout-v2';
 
 function loadSavedLayout() {
   try {
@@ -27,19 +27,30 @@ function loadSavedLayout() {
   } catch { return null; }
 }
 
-const panelNames = [
-  { key: 'analysts',         label: 'Analyst Team' },
-  { key: 'trading-decision', label: 'Trading Decision' },
-  { key: 'research',         label: 'Research Team' },
-  { key: 'risk',             label: 'Risk Management' },
-  { key: 'portfolio',        label: 'Final Trade Decision' },
-  { key: 'backtest',         label: 'Backtest Chart' },
+const panelOrder = [
+  'analysts',
+  'trading-decision',
+  'research',
+  'risk',
+  'portfolio',
+  'backtest',
 ];
+
+// Stagger delays for reveal animation
+const staggerDelays = {
+  'analysts':         '0s',
+  'trading-decision': '0.06s',
+  'research':         '0.12s',
+  'risk':             '0.18s',
+  'portfolio':        '0.24s',
+  'backtest':         '0.30s',
+};
 
 export default function App() {
   const [currentRun, setCurrentRun] = useState(null);
   const [loading, setLoading] = useState(false);
   const [layout, setLayout] = useState(loadSavedLayout() || DEFAULT_LAYOUT);
+  const [runKey, setRunKey] = useState(0); // force re-mount on new run for animation
 
   const handleLoad = useCallback(async (ticker, date) => {
     setLoading(true);
@@ -48,8 +59,10 @@ export default function App() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setCurrentRun(data);
+      setRunKey(k => k + 1);
     } catch (err) {
-      alert(`Failed to load run: ${err.message}`);
+      // Show error in a non-blocking way
+      console.error('Failed to load run:', err);
     } finally {
       setLoading(false);
     }
@@ -60,58 +73,84 @@ export default function App() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newLayout));
   }, []);
 
-  if (!currentRun) {
-    return (
-      <>
-        <RunSelector onLoad={handleLoad} />
-        <div className="loading-screen">
-          {loading ? 'Loading...' : 'Select a ticker and date to load a run'}
-        </div>
-      </>
-    );
-  }
-
-  if (loading) {
-    return (
-      <>
-        <RunSelector onLoad={handleLoad} />
-        <div className="loading-screen">Loading...</div>
-      </>
-    );
-  }
-
   const panels = {
-    analysts:         <AnalystsPanel run={currentRun} />,
+    analysts:           <AnalystsPanel run={currentRun} />,
     'trading-decision': <TradingDecisionPanel run={currentRun} />,
-    research:         <ResearchPanel run={currentRun} />,
-    risk:             <RiskPanel run={currentRun} />,
-    portfolio:        <PortfolioPanel run={currentRun} />,
-    backtest:         <BacktestChartPanel run={currentRun} />,
+    research:           <ResearchPanel run={currentRun} />,
+    risk:               <RiskPanel run={currentRun} />,
+    portfolio:          <PortfolioPanel run={currentRun} />,
+    backtest:           <BacktestChartPanel run={currentRun} />,
   };
 
   return (
     <>
-      <RunSelector onLoad={handleLoad} />
-      <div style={{ padding: '16px 24px' }}>
-        <GridLayout
-          className="layout"
-          layout={layout}
-          cols={12}
-          rowHeight={50}
-          width={1200}
-          onLayoutChange={handleLayoutChange}
-          draggableHandle=".panel-header"
-          isResizable={true}
-          compactType="vertical"
-          margin={[0, 0]}
-        >
-          {panelNames.map(p => (
-            <div key={p.key}>
-              {panels[p.key]}
+      <RunSelector onLoad={handleLoad} loading={loading} currentRun={currentRun} />
+
+      {loading ? (
+        <div className="loading-screen">
+          <div className="spinner" />
+          <span style={{ color: 'var(--color-muted)', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
+            Fetching run data…
+          </span>
+        </div>
+      ) : !currentRun ? (
+        <div className="idle-screen">
+          {/* Animated orb */}
+          <div className="idle-orb">
+            <div className="idle-orb-ring-2" />
+            <div className="idle-orb-ring" />
+            <div className="idle-orb-inner">
+              <span className="idle-logo">📊</span>
             </div>
-          ))}
-        </GridLayout>
-      </div>
+          </div>
+
+          <div style={{ textAlign: 'center' }}>
+            <div className="idle-title">TradingAgents Dashboard</div>
+            <div className="idle-sub" style={{ marginTop: 10 }}>
+              Select a ticker and date from the header, then click{' '}
+              <span style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-mono)' }}>Load</span>{' '}
+              to visualize the AI agent analysis.
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 24, marginTop: 8 }}>
+            {['Analyst Team', 'Research', 'Risk Mgmt', 'Decision'].map(label => (
+              <div key={label} style={{
+                fontSize: 9.5,
+                color: 'var(--color-dim)',
+                fontFamily: 'var(--font-mono)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                display: 'flex', alignItems: 'center', gap: 5
+              }}>
+                <span style={{ width: 5, height: 5, background: 'var(--color-border)', borderRadius: '50%', display: 'inline-block' }} />
+                {label}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="grid-wrapper" key={runKey}>
+          <GridLayout
+            className="layout"
+            layout={layout}
+            cols={12}
+            rowHeight={50}
+            width={1200}
+            onLayoutChange={handleLayoutChange}
+            draggableHandle=".panel-header"
+            isResizable={true}
+            compactType="vertical"
+            margin={[8, 8]}
+          >
+            {panelOrder.map(key => (
+              <div key={key} style={{ '--stagger': staggerDelays[key] }}>
+                {panels[key]}
+              </div>
+            ))}
+          </GridLayout>
+        </div>
+      )}
     </>
   );
 }
