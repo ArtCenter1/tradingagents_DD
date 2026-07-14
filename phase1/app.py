@@ -100,7 +100,7 @@ def run_detail(ticker: str, date: str):
 
     # Portfolio / final decision
     final_decision = state.get("final_trade_decision", "")
-    trader_plan = state.get("trader_investment_plan", "")
+    trader_plan = state.get("trader_investment_decision", "")
     investment_plan = state.get("investment_plan", "")
 
     # Determine action badge

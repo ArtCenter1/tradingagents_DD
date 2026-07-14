@@ -36,7 +36,7 @@ Every panel receives `currentRun` (full state object from `/api/run/{ticker}/{da
 
 ## 🎯 Trading Decision Panel
 
-**Data source:** `currentRun.trader_investment_plan`
+**Data source:** `currentRun.trader_investment_decision`
 
 **Layout:** Action badge (BUY/SELL/HOLD) at top, markdown content below.
 

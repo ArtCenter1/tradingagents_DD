@@ -10,7 +10,7 @@ function detectAction(text) {
 
 export default function TradingDecisionPanel({ run }) {
   const decision = run?.final_trade_decision || '';
-  const traderPlan = run?.trader_investment_plan || '';
+  const traderPlan = run?.trader_investment_decision || '';
   const action = detectAction(decision);
 
   return (

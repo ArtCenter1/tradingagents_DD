@@ -87,10 +87,14 @@ def list_tickers() -> List[str]:
     results_dir = get_results_dir()
     if not results_dir.exists():
         return []
-    return sorted([
-        d.name for d in results_dir.iterdir()
-        if d.is_dir() and (d / "TradingAgentsStrategy_logs").exists()
-    ])
+    tickers = []
+    for d in results_dir.iterdir():
+        if not d.is_dir():
+            continue
+        log_dir = d / "TradingAgentsStrategy_logs"
+        if log_dir.exists() and any(log_dir.glob("full_states_log_*.json")):
+            tickers.append(d.name)
+    return sorted(tickers)
 
 
 def list_runs_for_ticker(ticker: str) -> List[Dict[str, str]]:

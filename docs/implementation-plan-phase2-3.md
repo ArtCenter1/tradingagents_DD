@@ -266,7 +266,7 @@ Header bar component.
 #### [NEW] `frontend/src/panels/TradingDecisionPanel.jsx`
 
 - Props: `run`
-- Reads: `run.trader_investment_plan`, `run.final_trade_decision`
+- Reads: `run.trader_investment_decision`, `run.final_trade_decision`
 - Action detection: scan `final_trade_decision.toLowerCase()` for `"buy"` / `"sell"` → default `HOLD`
 - Renders: action badge (`badge-buy` / `badge-sell` / `badge-hold`) + markdown body
 
