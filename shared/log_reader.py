@@ -15,7 +15,7 @@ import re
 import os
 
 # Default: sibling directory to this project root
-DEFAULT_RESULTS_DIR = Path(__file__).resolve().parents[1] / ".." / "TradingAgents" / "results"
+DEFAULT_RESULTS_DIR = Path(__file__).resolve().parents[1] / "results"
 
 
 def get_results_dir() -> Path:
@@ -39,12 +39,10 @@ def list_runs(ticker: Optional[str] = None) -> List[Dict[str, str]]:
         return []
 
     runs = []
-    search_base = results_dir / ticker if ticker else results_dir
-    if not search_base.exists():
-        return []
+    tickers_to_search = [results_dir / ticker] if ticker else results_dir.iterdir()
 
-    for tdir in search_base.iterdir() if ticker else search_base.iterdir():
-        if not tdir.is_dir():
+    for tdir in tickers_to_search:
+        if not tdir.exists() or not tdir.is_dir():
             continue
         log_dir = tdir / "TradingAgentsStrategy_logs"
         if not log_dir.exists():
