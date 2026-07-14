@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ company }} ({{ ticker }}) — {{ date }} | TradingAgents_DD</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    :root {
+      --color-bg: #0f1117;
+      --color-surface: #1a1d27;
+      --color-surface-2: #151821;
+      --color-border: #2d3142;
+      --color-accent: #22d3ee;
+      --color-green: #34d399;
+      --color-red: #f87171;
+      --color-amber: #fbbf24;
+      --color-text: #e2e8f0;
+      --color-muted: #94a3b8;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+    body {
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      min-height: 100vh;
+    }
+    /* ---- Navigation ---- */
+    .topbar {
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-surface);
+      padding: 0.75rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand { color: var(--color-accent); font-weight: 700; font-size: 15px; text-decoration: none; }
+    .company-label { color: var(--color-text); font-weight: 600; }
+    .date-label { color: var(--color-muted); font-size: 11px; }
+    .back-btn {
+      margin-left: auto;
+      background: rgba(34,211,238,0.1);
+      border: 1px solid var(--color-border);
+      color: var(--color-muted);
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-family: var(--font-mono);
+    }
+    .back-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
+    /* ---- Main Layout ---- */
+    .container-fluid { padding: 1.5rem 2rem; }
+    .row { --bs-gutter-x: 1rem; --bs-gutter-y: 1rem; }
+
+    /* ---- Panel ---- */
+    .panel {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+    .panel-header {
+      background: rgba(255,255,255,0.025);
+      border-bottom: 1px solid var(--color-border);
+      padding: 0 1rem;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
+    .panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      font-size: 12px;
+    }
+
+    /* ---- Tabs ---- */
+    .nav-tabs { border-bottom: 1px solid var(--color-border); }
+    .nav-tabs .nav-link {
+      color: var(--color-muted);
+      font-size: 11px;
+      padding: 6px 12px;
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+    }
+    .nav-tabs .nav-link:hover { color: var(--color-text); border-color: var(--color-border); }
+    .nav-tabs .nav-link.active { color: var(--color-accent); border-bottom-color: var(--color-accent); background: transparent; }
+    .tab-content { padding-top: 0.75rem; }
+
+    /* ---- Markdown Render ---- */
+    .md-content h1,.md-content h2,.md-content h3 { color: var(--color-text); margin: 1em 0 0.5em; }
+    .md-content h1 { font-size: 16px; }
+    .md-content h2 { font-size: 14px; color: var(--color-accent); }
+    .md-content h3 { font-size: 13px; }
+    .md-content p { color: var(--color-text); line-height: 1.7; margin-bottom: 0.75em; }
+    .md-content ul,.md-content ol { padding-left: 1.5em; color: var(--color-text); }
+    .md-content li { margin-bottom: 0.3em; }
+    .md-content code { background: var(--color-surface-2); padding: 1px 5px; border-radius: 3px; color: var(--color-accent); font-size: 11px; }
+    .md-content pre { background: var(--color-surface-2); padding: 0.75rem; border-radius: 6px; overflow-x: auto; }
+    .md-content pre code { background: none; padding: 0; }
+    .md-content table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    .md-content th { color: var(--color-muted); border-bottom: 1px solid var(--color-border); padding: 4px 8px; text-align: left; }
+    .md-content td { border-bottom: 1px solid var(--color-border); padding: 4px 8px; }
+    .md-content blockquote { border-left: 3px solid var(--color-accent); padding-left: 1em; color: var(--color-muted); margin: 0.75em 0; }
+
+    /* ---- Action Badge ---- */
+    .action-badge {
+      display: inline-block;
+      font-size: 20px;
+      font-weight: 700;
+      padding: 6px 24px;
+      border-radius: 6px;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+      border: 1px solid;
+    }
+    .badge-buy  { background: rgba(52,211,153,0.12); color: var(--color-green); border-color: var(--color-green); }
+    .badge-sell { background: rgba(248,113,113,0.12); color: var(--color-red);   border-color: var(--color-red); }
+    .badge-hold { background: rgba(251,191,36,0.12);  color: var(--color-amber); border-color: var(--color-amber); }
+
+    /* ---- Section label ---- */
+    .section-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-muted);
+      margin-bottom: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<nav class="topbar">
+  <a class="brand" href="/">📊 TradingAgents_DD</a>
+  <span class="company-label">{{ company }}</span>
+  <span class="date-label">{{ date }}</span>
+  <a class="back-btn" href="/">← All Runs</a>
+</nav>
+
+<!-- Main Grid -->
+<div class="container-fluid">
+
+  <!-- Row 1: Analysts (left, 2/3) + Trading Decision (right, 1/3) -->
+  <div class="row" style="height: 420px;">
+    <!-- Analysts Panel -->
+    <div class="col-8">
+      <div class="panel">
+        <div class="panel-header">📊 Analyst Team</div>
+        <div class="panel-body">
+          {% if analysts %}
+            <ul class="nav nav-tabs" id="analyst-tabs" role="tablist">
+              {% for name, _ in analysts %}
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link {% if loop.first %}active{% endif %}"
+                    id="analyst-{{ loop.index }}-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#analyst-{{ loop.index }}"
+                    type="button" role="tab">
+                    {{ name }}
+                  </button>
+                </li>
+              {% endfor %}
+            </ul>
+            <div class="tab-content" id="analyst-tabs-content">
+              {% for name, content in analysts %}
+                <div class="tab-pane fade {% if loop.first %}show active{% endif %}"
+                  id="analyst-{{ loop.index }}" role="tabpanel">
+                  <div class="md-content" data-md="{{ loop.index }}">{{ content }}</div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p style="color:var(--color-muted);">No analyst reports found.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Trading Decision Panel -->
+    <div class="col-4">
+      <div class="panel">
+        <div class="panel-header">🎯 Trading Decision</div>
+        <div class="panel-body">
+          <div class="section-label">Final Action</div>
+          <div class="action-badge {{ action_class }}">{{ action }}</div>
+
+          <div class="section-label" style="margin-top:1rem;">Trader's Plan</div>
+          {% if trader_plan %}
+            <div class="md-content" data-md="trader">{{ trader_plan }}</div>
+          {% else %}
+            <p style="color:var(--color-muted);font-size:11px;">No trading plan.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Research (left) + Risk (right) -->
+  <div class="row mt-3" style="height: 300px;">
+    <!-- Research Panel -->
+    <div class="col-6">
+      <div class="panel">
+        <div class="panel-header">🔍 Research Team</div>
+        <div class="panel-body">
+          {% if research_tabs %}
+            <ul class="nav nav-tabs" id="research-tabs" role="tablist">
+              {% for name, _ in research_tabs %}
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link {% if loop.first %}active{% endif %}"
+                    id="research-{{ loop.index }}-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#research-{{ loop.index }}"
+                    type="button" role="tab">
+                    {{ name }}
+                  </button>
+                </li>
+              {% endfor %}
+            </ul>
+            <div class="tab-content">
+              {% for name, content in research_tabs %}
+                <div class="tab-pane fade {% if loop.first %}show active{% endif %}"
+                  id="research-{{ loop.index }}" role="tabpanel">
+                  <div class="md-content">{{ content }}</div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p style="color:var(--color-muted);">No research debate found.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Risk Panel -->
+    <div class="col-6">
+      <div class="panel">
+        <div class="panel-header">🛡️ Risk Management</div>
+        <div class="panel-body">
+          {% if risk_tabs %}
+            <ul class="nav nav-tabs" id="risk-tabs" role="tablist">
+              {% for name, _ in risk_tabs %}
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link {% if loop.first %}active{% endif %}"
+                    id="risk-{{ loop.index }}-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#risk-{{ loop.index }}"
+                    type="button" role="tab">
+                    {{ name }}
+                  </button>
+                </li>
+              {% endfor %}
+            </ul>
+            <div class="tab-content">
+              {% for name, content in risk_tabs %}
+                <div class="tab-pane fade {% if loop.first %}show active{% endif %}"
+                  id="risk-{{ loop.index }}" role="tabpanel">
+                  <div class="md-content">{{ content }}</div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p style="color:var(--color-muted);">No risk debate found.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 3: Portfolio Manager + Investment Plan (full width) -->
+  <div class="row mt-3" style="height: auto;">
+    <div class="col-12">
+      <div class="panel">
+        <div class="panel-header">📋 Final Trade Decision</div>
+        <div class="panel-body">
+          {% if investment_plan %}
+            <div class="md-content">{{ investment_plan }}</div>
+          {% else %}
+            <div class="md-content">{{ final_decision }}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container-fluid -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Render all markdown content blocks
+  document.querySelectorAll('.md-content').forEach(function(el) {
+    var md = el.getAttribute('data-md');
+    if (md) {
+      // Content already in innerHTML from Flask
+      // Render any remaining raw text as markdown
+      if (!el.dataset.parsed) {
+        el.innerHTML = marked.parse(el.innerHTML);
+        el.dataset.parsed = 'true';
+      }
+    }
+  });
+  // Run markdown parse on all panels
+  document.querySelectorAll('.md-content').forEach(function(el) {
+    if (!el.dataset.parsed) {
+      el.innerHTML = marked.parse(el.innerHTML.trim());
+      el.dataset.parsed = 'true';
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+name: Feature
+description: A new feature or enhancement
+title: "[feat] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Feature Description
+        What should this feature do? Be specific.
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Acceptance Criteria
+        - [ ] What must be true when this is done?
+        - [ ] What does the user see / interact with?
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Technical Notes (optional)
+        Implementation hints, file paths to modify, constraints.
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Phase
+        Which phase does this belong to?
+        - [ ] Phase 1 — Flask MVP
+        - [ ] Phase 2 — FastAPI Backend
+        - [ ] Phase 3 — React SPA
+        - [ ] Phase 4 — SSE Live Updates
+        - [ ] Phase 5 — Charts + Watchlist
+        - [ ] Phase 6 — Docs
+        - [ ] Cross-cutting

@@ -1,0 +1,32 @@
+name: Bug
+description: Something is broken
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## What happened
+        Describe the bug clearly.
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Steps to reproduce
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Expected vs Actual
+        What did you expect? What happened instead?
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Environment
+        - Phase: [1 / 2 / 3]
+        - Browser / Python version:
+        - RESULTS_DIR: ...
