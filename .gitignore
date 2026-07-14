@@ -5,5 +5,11 @@ __pycache__/
 # Local Data
 results/
 
+# Node.js / Frontend
+node_modules/
+dist/
+frontend-tmp/
+.env
+
 # Temp
 NUL
