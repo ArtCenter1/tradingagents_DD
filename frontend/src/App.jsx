@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import GridLayout from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import RunSelector from './components/RunSelector.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
 import AnalystsPanel from './panels/AnalystsPanel.jsx';
 import ResearchPanel from './panels/ResearchPanel.jsx';
 import TradingDecisionPanel from './panels/TradingDecisionPanel.jsx';
@@ -130,26 +131,28 @@ export default function App() {
           </div>
         </div>
       ) : (
-        <div className="grid-wrapper" key={runKey}>
-          <GridLayout
-            className="layout"
-            layout={layout}
-            cols={12}
-            rowHeight={50}
-            width={1200}
-            onLayoutChange={handleLayoutChange}
-            draggableHandle=".panel-header"
-            isResizable={true}
-            compactType="vertical"
-            margin={[8, 8]}
-          >
-            {panelOrder.map(key => (
-              <div key={key} style={{ '--stagger': staggerDelays[key] }}>
-                {panels[key]}
-              </div>
-            ))}
-          </GridLayout>
-        </div>
+        <ErrorBoundary>
+          <div className="grid-wrapper" key={runKey}>
+            <GridLayout
+              className="layout"
+              layout={layout}
+              cols={12}
+              rowHeight={50}
+              width={1200}
+              onLayoutChange={handleLayoutChange}
+              draggableHandle=".panel-header"
+              isResizable={true}
+              compactType="vertical"
+              margin={[8, 8]}
+            >
+              {panelOrder.map(key => (
+                <div key={key} style={{ '--stagger': staggerDelays[key] }}>
+                  {panels[key]}
+                </div>
+              ))}
+            </GridLayout>
+          </div>
+        </ErrorBoundary>
       )}
     </>
   );

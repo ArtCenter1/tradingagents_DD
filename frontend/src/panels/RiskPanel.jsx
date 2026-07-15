@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { marked } from 'marked';
+import { parseMarkdown } from '../utils.js';
 
 const TAB_META = [
   { key: 'aggressive_history',  label: 'Aggressive',   icon: '🔥', variant: 'aggr' },
@@ -37,7 +37,7 @@ export default function RiskPanel({ run }) {
           ))}
         </div>
         {content ? (
-          <div className="md-content" dangerouslySetInnerHTML={{ __html: marked.parse(content) }} />
+          <div className="md-content" dangerouslySetInnerHTML={{ __html: parseMarkdown(content) }} />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 8, color: 'var(--color-muted)' }}>
             <span style={{ fontSize: 24 }}>📭</span>

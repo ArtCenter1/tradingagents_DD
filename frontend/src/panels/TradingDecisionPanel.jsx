@@ -1,4 +1,4 @@
-import { marked } from 'marked';
+import { parseMarkdown } from '../utils.js';
 
 function detectAction(text) {
   if (!text) return 'HOLD';
@@ -59,7 +59,7 @@ export default function TradingDecisionPanel({ run }) {
         {/* Trader's plan */}
         <div className="section-label" style={{ marginTop: 4 }}>Trader's Plan</div>
         {traderPlan ? (
-          <div className="md-content" dangerouslySetInnerHTML={{ __html: marked.parse(traderPlan) }} />
+          <div className="md-content" dangerouslySetInnerHTML={{ __html: parseMarkdown(traderPlan) }} />
         ) : (
           <p style={{ color: 'var(--color-muted)', fontSize: 11 }}>No trading plan available.</p>
         )}

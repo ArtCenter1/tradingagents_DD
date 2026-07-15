@@ -1,4 +1,4 @@
-import { marked } from 'marked';
+import { parseMarkdown } from '../utils.js';
 
 export default function PortfolioPanel({ run }) {
   const plan = run?.investment_plan || run?.final_trade_decision || '';
@@ -25,7 +25,7 @@ export default function PortfolioPanel({ run }) {
           <>
             <div className="portfolio-highlight">
               <div className="section-label">Investment Plan</div>
-              <div className="md-content" dangerouslySetInnerHTML={{ __html: marked.parse(plan) }} />
+              <div className="md-content" dangerouslySetInnerHTML={{ __html: parseMarkdown(plan) }} />
             </div>
           </>
         ) : (
